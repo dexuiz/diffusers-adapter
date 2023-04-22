@@ -175,6 +175,8 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
 
         self.sample_size = sample_size
 
+        print("INIT 2D")
+
         # Check inputs
         if len(down_block_types) != len(up_block_types):
             raise ValueError(
