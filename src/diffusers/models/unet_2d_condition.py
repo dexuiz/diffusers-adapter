@@ -175,8 +175,6 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
 
         self.sample_size = sample_size
 
-        print("INIT 2D")
-
         # Check inputs
         if len(down_block_types) != len(up_block_types):
             raise ValueError(
@@ -692,8 +690,12 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
         if self.encoder_hid_proj is not None:
             encoder_hidden_states = self.encoder_hid_proj(encoder_hidden_states)
 
+        print(f"before preprocess {sample.shape}")
+
         # 2. pre-process
         sample = self.conv_in(sample)
+
+        print(f"preprocessed {sample.shape}")
 
         # 3. down
         down_block_res_samples = (sample,)
@@ -722,6 +724,9 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
 
             down_block_res_samples = new_down_block_res_samples
 
+        print(f"DOWN {sample.shape}")
+
+
         # 4. mid
         if self.mid_block is not None:
             sample = self.mid_block(
@@ -734,6 +739,8 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
 
         if mid_block_additional_residual is not None:
             sample = sample + mid_block_additional_residual
+
+        print(f"MID {sample.shape}")
 
         # 5. up
         for i, upsample_block in enumerate(self.up_blocks):
@@ -761,6 +768,7 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
                 sample = upsample_block(
                     hidden_states=sample, temb=emb, res_hidden_states_tuple=res_samples, upsample_size=upsample_size
                 )
+        print(f"UP {sample.shape}")
 
         # 6. post-process
         if self.conv_norm_out:
@@ -771,4 +779,5 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
         if not return_dict:
             return (sample,)
 
+        print(f"FINAL {sample.shape}")
         return UNet2DConditionOutput(sample=sample)

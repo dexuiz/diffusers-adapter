@@ -2266,6 +2266,8 @@ class SkipUpBlock2D(nn.Module):
         return hidden_states, skip_sample
 
 
+
+
 class ResnetUpsampleBlock2D(nn.Module):
     def __init__(
         self,
