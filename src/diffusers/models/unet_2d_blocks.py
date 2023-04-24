@@ -749,6 +749,65 @@ class AttnDownBlock2D(nn.Module):
 
         return hidden_states, output_states
 
+# class adapter_conv(nn.Module):
+#     def __init_():
+#         pass
+#     def forward(x):
+#         return x
+
+class Bottleneck(torch.nn.Module):
+
+    def __init__(self, in_channels, out_channels, stride=1):
+        super().__init__()
+
+        self.conv1 = torch.nn.Conv2d(in_channels, out_channels // 4, kernel_size=1, stride=1, padding=0)
+        # self.bn1 = torch.nn.BatchNorm2d(out_channels // 4)
+        self.relu = torch.nn.ReLU()
+
+        self.conv2 = torch.nn.Conv2d(out_channels // 4, out_channels // 4, kernel_size=3, stride=stride, padding=1)
+        self.bn2 = torch.nn.BatchNorm2d(out_channels // 4)
+        self.relu = torch.nn.ReLU()
+
+        self.conv3 = torch.nn.Conv2d(out_channels // 4, out_channels, kernel_size=1, stride=1, padding=0)
+        self.bn3 = torch.nn.BatchNorm2d(out_channels)
+
+        if stride != 1:
+            self.shortcut = torch.nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, padding=0)
+        else:
+            self.shortcut = None
+
+    def forward(self, x):
+        if self.shortcut is not None:
+            x = self.shortcut(x)
+
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.relu(x)
+
+        x = self.conv3(x)
+        x = self.bn3(x)
+
+        return x + x
+
+class Adapter(nn.Module):
+    def __init__(
+        self,
+        in_channels:int,
+        out_channels: int,
+        temb_channels: int,
+        num_layers:int
+    ):
+        super().__init__()
+        self.conv_block
+
+    def forward(
+            self, hidden_states, temb=None, encoder_hidden_states=None, attention_mask=None, cross_attention_kwargs=None
+        ):
+    
 
 class CrossAttnDownBlock2D(nn.Module):
     def __init__(
@@ -2264,7 +2323,6 @@ class SkipUpBlock2D(nn.Module):
             hidden_states = self.resnet_up(hidden_states, temb)
 
         return hidden_states, skip_sample
-
 
 
 
